@@ -76,10 +76,8 @@ class UserProfileView(APIView):
         user = request.user
         serializer = UserProfileSerializer(request.user)
         response_data = {
-            'msg': f'The profile details of the user with user id {user.id} is : ',
-            # 'id': user.id,
-            # 'email': user.email,
-            # 'name': f'{user.firstname} {user.lastname}',
+            'msg': f'success',
+            'id': user.id,
             'data': serializer.data,
         }
         return Response(response_data,status=status.HTTP_200_OK)
