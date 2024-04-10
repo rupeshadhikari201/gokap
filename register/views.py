@@ -13,6 +13,8 @@ from django.utils.encoding import smart_str
 from django.utils.http import urlsafe_base64_decode
 from register.models import User, Projects
 
+
+
 # function to generate jwt access and refresh token
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -222,6 +224,16 @@ class VerifyUserEmailView(APIView):
         serialized = VerifyUserEmailSerializer(data=request.data, context=context)
         
         if serialized.is_valid():
+            id = id[4]
+            actual_id = uid
+            print("im here with actual_id", actual_id)
+            user = User.objects.get(id=actual_id)
+            print('the user is : ', user)
+            try:
+                cl= Client.objects.create(user=user)
+                cl.save()
+            except Exception as e:
+                return Response({"err":"Aleady Verified"})
             return render(request=request,template_name='verified.html')            
 
         return render(request=request, template_name='404.html')
@@ -291,7 +303,9 @@ class GetCreatedProjects(APIView):
         # get all the projects created by the user with given id. 
         queryset = Projects.objects.filter(client_id=id)
         serializer = ProjectCreationSerializer(queryset, many=True)
-
+        print("the type of serializer is : ", type(serializer))
+        print("the type of serializer data is : ", type(serializer.data))
+        
         return Response(serializer.data)
     
 class ProjectAssignView(APIView):

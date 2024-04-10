@@ -5,7 +5,8 @@ from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeErr
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework import serializers
-from register.models import Client, Projects, User, Freelancer, ProjectsAssigned
+from backend.settings import BASE_URL
+from register.models import Client, ProjectStatus, Projects, User, Freelancer, ProjectsAssigned
 from register.utils import Util
 from django.core.mail import send_mail
 from django.conf import settings
@@ -101,7 +102,7 @@ class SendPasswordResetEmailSerializer(serializers.ModelSerializer):
             token = PasswordResetTokenGenerator().make_token(user)
             print("Password Reset Token : ", token)
             # 4. generate the reset link
-            link = "https://gokap.onrender.com/api/user/user-password-update/" + uid +"/" + token
+            link = BASE_URL + "/api/user/user-password-update/" + uid +"/" + token
             print("Password Reset Link : ", link)
             print("The target email is : ", user.email)
             subject = 'Password Reset'
@@ -162,13 +163,7 @@ class FreelancerCreationSerializer(serializers.ModelSerializer):
         if 'languages' in data and isinstance(data['languages'], str):
             data['languages'] = data['languages'].strip('][').split(', ')
         return super().to_internal_value(data)
-    # def validate(self, attrs):
-    #     skils = attrs.get('skills')
-    #     print("the skill type is : ", skils)
-    #     skills_list = ast.literal_eval(skils)
-    #     print("the list of skills is: ", skills_list)
-    #     attrs['skills'] = skills_list
-    #     return attrs
+    
 
 class ClientCreationSerializer(serializers.ModelSerializer):
 
@@ -185,52 +180,13 @@ class ClientCreationSerializer(serializers.ModelSerializer):
         user = User.objects.get(id=user_id)
         client = Client.objects.create(user=user, **validated_data)
         return client
-   
-# class ClientCreationSerializer(serializers.ModelSerializer):
-#     # user = User()?
-    
-#     class Meta:
-#         model = Client
-#         fields = ['user','projects_uploaded'] 
-        
-#     # def create(self, validated_data):
-#     #     user_data = validated_data.pop('user')
-#     #     user = User.objects.create(**user_data)
-#     #     client = Client.objects.create(user=user, **validated_data)
-#     #     return client
-    
-#     # def validate_user(self, value):
-#     #     if not value.exists():
-#     #         raise serializers.ValidationError("Invalid user ID. User does not exist.")
-#     #     return value
-    
-#     # def validate_user(self, value):
-#     #     try:
-#     #         user = User.objects.get(pk=value)
-#     #     except User.DoesNotExist:
-#     #         raise serializers.ValidationError("Invalid user ID. User does not exist.")
-#     #     return value
-    
-#     # Validate that the provided user object has a valid ID
-#     # def validate_user(self, value):
-#     #     if not isinstance(value, int):
-#     #         raise serializers.ValidationError("Invalid user ID format.")
-#     #     return value
-    
-#     def validate_user(self, value):
-#         try:
-#             # user_id = int(value)
-#             user = User.objects.get(id=value)
-#             print('kye the user is ', user)
-#             return user
-#         except (ValueError, User.DoesNotExist):
-#             raise serializers.ValidationError("Invalid user ID format.")
         
 class ProjectCreationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Projects
-        fields = ['project_category', 'title','description', 'project_price', 'project_deadline','skills_required','client']
+        fields = ['project_category', 'title','description', 'project_price', 'project_deadline','skills_required','client',
+                  'created_at', 'updated_at', 'payment_status', 'project_status','project_assigned_status']
         
 class SendUserVerificationSerializer(serializers.ModelSerializer):
       
@@ -254,7 +210,7 @@ class SendUserVerificationSerializer(serializers.ModelSerializer):
             token = PasswordResetTokenGenerator().make_token(user)
             print("Password Reset Token : ", token)
             # 4. generate the reset link
-            link = "https://gokap.onrender.com/api/user/validate-email/" + uid +"/" + token
+            link = BASE_URL + "/api/user/validate-email/" + uid +"/" + token
             print("Password Reset Link : ", link)
             print("The target email is : ", user.email)
             subject = 'Verify Your Email'
@@ -336,5 +292,3 @@ class ProjectAssignSerializer(serializers.ModelSerializer):
         except:
             attrs['assigned'] = False
             return attrs
-
-    

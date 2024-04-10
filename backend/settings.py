@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
+BASE_URL = 'http://localhost:8000' if os.getenv('PRODUCTION') == 'False' else 'https://gokap.onrender.com'
+print("base url is : ", BASE_URL)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
